@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { getFixtureStream } from 'test/utilities';
-import { trebuchet } from 'src/warm-up/2023-01';
+import { trebuchet } from 'src/warm-up/2023-01/part1';
 
 describe('AoC 2023 / Day 1: Trebuchet?!', () => {
   it('should return 142 for the first test calibration document', async () => {
