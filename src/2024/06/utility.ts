@@ -1,6 +1,6 @@
 import type { ReadStream } from 'fs';
 import * as readline from 'readline';
-import { Direction, MappedArea, Position } from 'src/2024/06/types';
+import { Direction, DirectionTracker, MappedArea, Position } from 'src/2024/06/types';
 
 export const GUARD = '^';
 export const OBSTRUCTION = '#';
@@ -16,7 +16,7 @@ export const parseFile = async (puzzleInputFile: ReadStream) => {
   const mappedArea: MappedArea = [];
   let startingPosition: Position = [0, 0];
   for await (const line of lineReader) {
-    mappedArea.push(line);
+    mappedArea.push(line.split(''));
     if (line.includes(GUARD)) {
       startingPosition = [mappedArea.length - 1, (line as string).indexOf(GUARD)];
     }
@@ -25,7 +25,7 @@ export const parseFile = async (puzzleInputFile: ReadStream) => {
   return { mappedArea, startingPosition };
 };
 
-export const observe = (currentPosition: Position, direction: Direction, mappedArea: Array<string>) => {
+export const observe = (currentPosition: Position, direction: Direction, mappedArea: MappedArea) => {
   const areaWidth = mappedArea[0].length;
   const watchedPosition: Position = [currentPosition[0] + direction[0], currentPosition[1] + direction[1]];
   if (
@@ -36,7 +36,7 @@ export const observe = (currentPosition: Position, direction: Direction, mappedA
   ) {
     return null;
   } else {
-    return mappedArea[watchedPosition[0]].charAt(watchedPosition[1]);
+    return mappedArea[watchedPosition[0]][watchedPosition[1]];
   }
 };
 
@@ -55,9 +55,22 @@ export const changeDirection = (currentDirection: Direction): Direction => {
   }
 };
 
-export const move = (currentPosition: Position, direction: Direction, mappedArea: Array<string>): Position => {
+export const move = (currentPosition: Position, direction: Direction, mappedArea: MappedArea): Position => {
   const [x, y] = currentPosition;
-  mappedArea[x] = mappedArea[x].substring(0, y) + VISITED + mappedArea[x].substring(y + 1);
+  mappedArea[x][y] = VISITED;
 
   return [currentPosition[0] + direction[0], currentPosition[1] + direction[1]];
+};
+
+export const trackDirectionAtPosition = (position: Position, direction: Direction, tracker: DirectionTracker) => {
+  const [x, y] = position;
+
+  tracker[x] ??= [];
+  tracker[x][y] ??= new Set<string>();
+  tracker[x][y].add(`${direction[0]},${direction[1]}`);
+};
+export const positionHasDirection = (position: Position, direction: Direction, tracker: DirectionTracker) => {
+  const [x, y] = position;
+
+  return tracker[x] && tracker[x][y] && tracker[x][y].has(`${direction[0]},${direction[1]}`);
 };
