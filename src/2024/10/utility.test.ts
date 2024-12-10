@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { Readable } from 'stream';
 import { ReadStream } from 'fs';
 
-import { parseFile, search } from './utility';
+import { findRating, findScore, parseFile } from './utility';
 import { Location, TopographicMap } from './types';
 
 const testInput = [
@@ -47,7 +47,7 @@ describe('parseFile', () => {
   });
 });
 
-describe('search', () => {
+describe('findScore', () => {
   (
     [
       [5, [0, 2]],
@@ -62,7 +62,27 @@ describe('search', () => {
     ] as Array<[number, Location]>
   ).map(([score, location]) =>
     it(`should return ${score} for ${location}`, () => {
-      expect(search(location, null, expectedMap).size).toEqual(score);
+      expect(findScore(location, expectedMap).size).toEqual(score);
+    })
+  );
+});
+
+describe('findRating', () => {
+  (
+    [
+      [20, [0, 2]],
+      [24, [0, 4]],
+      [10, [2, 4]],
+      [4, [4, 6]],
+      [1, [5, 2]],
+      [4, [5, 5]],
+      [5, [6, 0]],
+      [8, [6, 6]],
+      [5, [7, 1]]
+    ] as Array<[number, Location]>
+  ).map(([rating, location]) =>
+    it(`should return ${rating} for ${location}`, () => {
+      expect(findRating(location, expectedMap)).toEqual(rating);
     })
   );
 });
