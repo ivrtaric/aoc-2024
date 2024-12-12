@@ -7,9 +7,5 @@ export async function plutonianPebbles(
 ): Promise<number> {
   const input = await parseFile(puzzleInputFile);
 
-  // return blinks(input, iterations);
-  return input.reduce((sum, stone) => {
-    console.log(`Handling stone ${stone}`);
-    return sum + blinkCount(stone, iterations);
-  }, 0);
+  return input.reduce((sum, stone) => sum + blinkCount(stone, iterations), 0);
 }
