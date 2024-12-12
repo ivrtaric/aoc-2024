@@ -1,24 +1,12 @@
 import type { ReadStream } from 'fs';
-import * as readline from 'readline';
+
+import type { Location, MappedArea } from '../common/types';
+import { keyOf, parseFile, xor } from '../common/utilities';
 
 import type { Region } from './types';
-import type { Location, MappedArea } from '../common/types';
 
-import { keyOf, xor } from '../common/utilities';
-
-export const parseFile = async (puzzleInputFile: ReadStream): Promise<MappedArea> => {
-  const lineReader = readline.createInterface({
-    input: puzzleInputFile,
-    crlfDelay: Infinity
-  });
-
-  const map: MappedArea = [];
-  for await (const line of lineReader) {
-    map.push(line.split(''));
-  }
-
-  return map;
-};
+export const parseInputFile = async (puzzleInputFile: ReadStream): Promise<MappedArea> =>
+  parseFile<Array<string>>(puzzleInputFile, line => line.split(''));
 
 export const findRegions = (map: MappedArea): Array<Region> => {
   const visited: Array<Array<boolean>> = map.map(row => row.map(_ => false));

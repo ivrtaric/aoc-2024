@@ -1,30 +1,22 @@
 import type { ReadStream } from 'fs';
-import * as readline from 'readline';
 
 import type { Direction, DirectionTracker } from './types';
 import type { Location, MappedArea } from '../common/types';
 
-import { keyOf } from '../common/utilities';
+import { keyOf, parseFile } from '../common/utilities';
 
 export const GUARD = '^';
 export const OBSTRUCTION = '#';
 export const PATH = '.';
 export const VISITED = 'X';
 
-export const parseFile = async (puzzleInputFile: ReadStream) => {
-  const lineReader = readline.createInterface({
-    input: puzzleInputFile,
-    crlfDelay: Infinity
-  });
-
-  const mappedArea: MappedArea = [];
+export const parseInputFile = async (puzzleInputFile: ReadStream) => {
   let startingPosition: Location = [0, 0];
-  for await (const line of lineReader) {
-    mappedArea.push(line.split(''));
-    if (line.includes(GUARD)) {
-      startingPosition = [mappedArea.length - 1, (line as string).indexOf(GUARD)];
-    }
-  }
+
+  const mappedArea: MappedArea = await parseFile(puzzleInputFile, line => line.split(''));
+  mappedArea.forEach((row, i) => {
+    if (row.includes(GUARD)) startingPosition = [i, row.indexOf(GUARD)];
+  });
 
   return { mappedArea, startingPosition };
 };

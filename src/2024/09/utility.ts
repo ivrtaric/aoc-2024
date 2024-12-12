@@ -1,19 +1,18 @@
 import type { ReadStream } from 'fs';
-import * as readline from 'readline';
+
+import { parseFile } from '../common/utilities';
 import { DiskMap, Fragment, ID, SIZE } from './types';
 
 export const FREE_SPACE = -1;
 
-export const parseFile = async (puzzleInputFile: ReadStream): Promise<Array<[number, number]>> => {
-  const lineReader = readline.createInterface({
-    input: puzzleInputFile,
-    crlfDelay: Infinity
-  });
-
+export const parseInputFile = async (
+  puzzleInputFile: ReadStream
+): Promise<Array<[number, number]>> => {
   let id = 0;
   let isFile = true;
   const diskMap: Array<[number, number]> = [];
-  for await (const line of lineReader) {
+
+  await parseFile(puzzleInputFile, line => {
     for (let i = 0; i < line.length; i++) {
       const digit = Number(line.charAt(i));
       if (isFile) {
@@ -25,7 +24,7 @@ export const parseFile = async (puzzleInputFile: ReadStream): Promise<Array<[num
 
       isFile = !isFile;
     }
-  }
+  });
 
   return diskMap;
 };

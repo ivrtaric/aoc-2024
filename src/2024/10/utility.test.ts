@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { Readable } from 'stream';
 import { ReadStream } from 'fs';
 
-import { findRating, findScore, parseFile } from './utility';
+import { findRating, findScore, parseInputFile } from './utility';
 import { TopographicMap } from './types';
 import type { Location } from '../common/types';
 
@@ -42,7 +42,7 @@ describe('parseFile', () => {
   it('should return correct disk map for a specified input', async () => {
     const fileStream = Readable.from(testInput);
 
-    const { startingPositions, map } = await parseFile(fileStream as ReadStream);
+    const { startingPositions, map } = await parseInputFile(fileStream as ReadStream);
     expect(map).toEqual(expectedMap);
     expect(startingPositions).toEqual(expectedStartingPositions);
   });

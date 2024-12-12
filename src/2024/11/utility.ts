@@ -1,19 +1,12 @@
 import type { ReadStream } from 'fs';
-import * as readline from 'readline';
+import { parseFile } from '../common/utilities';
 
-export const parseFile = async (puzzleInputFile: ReadStream): Promise<Array<number>> => {
-  const lineReader = readline.createInterface({
-    input: puzzleInputFile,
-    crlfDelay: Infinity
-  });
-
-  const puzzleInput: Array<number> = [];
-  for await (const line of lineReader) {
-    puzzleInput.push(...line.split(' ').filter(Boolean).map(Number));
-  }
-
-  return puzzleInput;
-};
+export const parseInputFile = async (puzzleInputFile: ReadStream): Promise<Array<number>> =>
+  (
+    await parseFile<Array<number>>(puzzleInputFile, line =>
+      line.split(' ').filter(Boolean).map(Number)
+    )
+  ).flat();
 
 const countsByStoneAndBlinks = new Map<string, number>();
 export const blinkCount = (stone: number, blinks: number): number => {

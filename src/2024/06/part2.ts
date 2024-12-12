@@ -1,21 +1,22 @@
 import type { ReadStream } from 'fs';
+
+import type { Location } from '../common/types';
+import { Direction, DirectionTracker } from './types';
 import {
   changeDirection,
   markVisitedAndMove,
   observe,
   OBSTRUCTION,
-  parseFile,
+  parseInputFile,
   PATH,
   positionHasDirection,
   trackDirectionAtPosition,
   traversePath,
   VISITED
 } from './utility';
-import { Direction, DirectionTracker } from './types';
-import type { Location } from '../common/types';
 
 export async function guardGallivant(puzzleInputFile: ReadStream): Promise<number> {
-  const { mappedArea, startingPosition } = await parseFile(puzzleInputFile);
+  const { mappedArea, startingPosition } = await parseInputFile(puzzleInputFile);
 
   const { mappedArea: originalPath } = traversePath(
     mappedArea.map(line => [...line]),

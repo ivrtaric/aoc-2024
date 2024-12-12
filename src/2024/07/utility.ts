@@ -1,27 +1,19 @@
 import type { ReadStream } from 'fs';
-import * as readline from 'readline';
 import { Equation } from 'src/2024/07/types';
+import { parseFile } from 'src/2024/common/utilities';
 
-export const parseFile = async (puzzleInputFile: ReadStream): Promise<Array<Equation>> => {
-  const lineReader = readline.createInterface({
-    input: puzzleInputFile,
-    crlfDelay: Infinity
-  });
-
-  const equations: Array<Equation> = [];
-  for await (const line of lineReader) {
+export const parseInputFile = async (puzzleInputFile: ReadStream): Promise<Array<Equation>> =>
+  parseFile<Equation>(puzzleInputFile, line => {
     const [strResult, strOperands] = line.split(':');
-    equations.push({
-      result: parseInt(strResult, 10),
+
+    return {
+      result: Number(strResult),
       operands: strOperands
         .split(' ')
         .filter(Boolean)
-        .map(strOp => parseInt(strOp.trim(), 10))
-    });
-  }
-
-  return equations;
-};
+        .map(strOp => Number(strOp.trim()))
+    };
+  });
 
 export const validateEquation = (eq: Equation, useConcatenation = false): number | null => {
   const { result, operands } = eq;
@@ -37,7 +29,10 @@ export const validateEquation = (eq: Equation, useConcatenation = false): number
     validateEquation({ result, operands: [first + second, ...rest] }, useConcatenation) ??
     validateEquation({ result, operands: [first * second, ...rest] }, useConcatenation) ??
     (useConcatenation
-      ? validateEquation({ result, operands: [concatenated(first, second), ...rest] }, useConcatenation)
+      ? validateEquation(
+          { result, operands: [concatenated(first, second), ...rest] },
+          useConcatenation
+        )
       : null)
   );
 };

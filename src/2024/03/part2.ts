@@ -1,18 +1,10 @@
 import { ReadStream } from 'fs';
-import * as readline from 'readline';
 
+import { loadLines } from '../common/utilities';
 import { findStatefulMuls } from './utility';
 
 export async function mullItOver(puzzleInputFile: ReadStream): Promise<number> {
-  const lineReader = readline.createInterface({
-    input: puzzleInputFile,
-    crlfDelay: Infinity
-  });
-
-  const lines: Array<string> = [];
-  for await (const line of lineReader) {
-    lines.push(line);
-  }
+  const lines = await loadLines(puzzleInputFile);
 
   const multiples: Array<number> = [];
   const lineMultiples = findStatefulMuls(lines.join(''));

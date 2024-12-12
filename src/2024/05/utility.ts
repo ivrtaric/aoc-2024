@@ -1,22 +1,18 @@
 import { ReadStream } from 'fs';
-import * as readline from 'readline';
 
+import { parseFile } from '../common/utilities';
 import type { Rule, Update } from './types';
 import { Section } from './types';
 
-export const parseFile = async (puzzleInputFile: ReadStream) => {
-  const lineReader = readline.createInterface({
-    input: puzzleInputFile,
-    crlfDelay: Infinity
-  });
-
+export const parseInputFile = async (puzzleInputFile: ReadStream) => {
   const rules: Array<Rule> = [];
   const updates: Array<Update> = [];
   let section: Section = Section.RULES;
-  for await (const line of lineReader) {
+
+  await parseFile(puzzleInputFile, line => {
     if (line === '') {
       section = Section.UPDATES;
-      continue;
+      return;
     }
 
     switch (section) {
@@ -29,7 +25,7 @@ export const parseFile = async (puzzleInputFile: ReadStream) => {
       default:
         throw new Error(`Unexpected section: ${section}`);
     }
-  }
+  });
 
   return { rules, updates };
 };

@@ -1,10 +1,12 @@
 import type { ReadStream } from 'fs';
-import { parseFile, validateEquation } from 'src/2024/07/utility';
+import { parseInputFile, validateEquation } from 'src/2024/07/utility';
 
 export async function bridgeRepair(puzzleInputFile: ReadStream): Promise<number> {
-  const equations = await parseFile(puzzleInputFile);
+  const equations = await parseInputFile(puzzleInputFile);
 
-  const results: Array<number> = equations.map(eq => validateEquation(eq)).filter(r => r !== null);
+  const results: Array<number> = equations
+    .map(eq => validateEquation(eq, false))
+    .filter(r => r !== null);
 
   return results.reduce((sum, r) => sum + r, 0);
 }

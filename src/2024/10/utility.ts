@@ -1,27 +1,24 @@
 import type { ReadStream } from 'fs';
-import * as readline from 'readline';
 
-import { Location } from '../common/types';
-import { PuzzleInput, TopographicMap } from './types';
-import { keyOf } from 'src/2024/common/utilities';
+import type { Location } from '../common/types';
+import { keyOf, parseFile } from '../common/utilities';
 
-export const parseFile = async (puzzleInputFile: ReadStream): Promise<PuzzleInput> => {
-  const lineReader = readline.createInterface({
-    input: puzzleInputFile,
-    crlfDelay: Infinity
-  });
+import type { PuzzleInput, TopographicMap } from './types';
 
-  const topographicMap: TopographicMap = [];
+export const parseInputFile = async (puzzleInputFile: ReadStream): Promise<PuzzleInput> => {
+  [];
   const startingPositions: Array<Location> = [];
   let currentIndex = 0;
-  for await (const line of lineReader) {
+
+  const topographicMap: TopographicMap = await parseFile<Array<number>>(puzzleInputFile, line => {
     const currentLine = line.split('').map(n => Number(n));
-    topographicMap.push(currentLine);
     currentLine.forEach((n, i) => {
       if (n === 0) startingPositions.push([currentIndex, i]);
     });
     currentIndex++;
-  }
+
+    return currentLine;
+  });
 
   return { map: topographicMap, startingPositions };
 };

@@ -1,8 +1,8 @@
 import type { ReadStream } from 'fs';
-import { compact, defragment, FREE_SPACE, parseFile } from './utility';
+import { compact, defragment, FREE_SPACE, parseInputFile } from './utility';
 
 export async function diskFragmenter(puzzleInputFile: ReadStream): Promise<number> {
-  const diskMap = await parseFile(puzzleInputFile);
+  const diskMap = await parseInputFile(puzzleInputFile);
 
   const defragmented = compact(defragment(diskMap));
 

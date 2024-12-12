@@ -1,21 +1,15 @@
 import type { ReadStream } from 'fs';
-import * as readline from 'readline';
 
-import { LocationMap, MappedArea, Tiles } from './types';
 import type { Location } from '../common/types';
+import { keyOf, parseFile } from '../common/utilities';
+import { LocationMap, MappedArea, Tiles } from './types';
 
-import { keyOf } from '../common/utilities';
-
-export const parseFile = async (puzzleInputFile: ReadStream): Promise<MappedArea> => {
-  const lineReader = readline.createInterface({
-    input: puzzleInputFile,
-    crlfDelay: Infinity
-  });
-
+export const parseInputFile = async (puzzleInputFile: ReadStream): Promise<MappedArea> => {
   const antennas: LocationMap = new Map<string, Array<Location>>();
   let height: number = 0;
   let width: number = 0;
-  for await (const line of lineReader) {
+
+  await parseFile(puzzleInputFile, line => {
     line.split('').forEach((tile, y) => {
       if (tile === Tiles.EMPTY || tile === Tiles.ANTINODE) return;
 
@@ -23,9 +17,10 @@ export const parseFile = async (puzzleInputFile: ReadStream): Promise<MappedArea
       frequencyAntennas.push([height, y]);
       antennas.set(tile, frequencyAntennas);
     });
+
     height++;
     width = line.length;
-  }
+  });
 
   return {
     width,

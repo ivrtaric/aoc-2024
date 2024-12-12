@@ -1,8 +1,8 @@
 import { ReadStream } from 'fs';
-import { findAllAntiNodes, parseFile } from './utility';
+import { findAllAntiNodes, parseInputFile } from './utility';
 
 export async function resonantCollinearity(puzzleInputFile: ReadStream): Promise<number> {
-  const mappedArea = await parseFile(puzzleInputFile);
+  const mappedArea = await parseInputFile(puzzleInputFile);
 
   return findAllAntiNodes(mappedArea, true, true).size;
 }

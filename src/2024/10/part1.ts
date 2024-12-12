@@ -1,8 +1,8 @@
 import type { ReadStream } from 'fs';
-import { findScore, parseFile } from './utility';
+import { findScore, parseInputFile } from './utility';
 
 export async function hoofIt(puzzleInputFile: ReadStream): Promise<number> {
-  const { startingPositions, map } = await parseFile(puzzleInputFile);
+  const { startingPositions, map } = await parseInputFile(puzzleInputFile);
 
   const resultsArray = startingPositions.map(p => findScore(p, map));
 

@@ -2,20 +2,20 @@ import { describe, expect, it } from 'vitest';
 import { Readable } from 'stream';
 import { ReadStream } from 'fs';
 
-import { findArea, findPerimeter, findRegions, findSides, parseFile } from './utility';
+import { findArea, findPerimeter, findRegions, findSides, parseInputFile } from './utility';
 import { Region } from './types';
 
 describe('parseFile', () => {
   it('should return correct result for a first input', async () => {
     const fileStream = Readable.from(testInput1);
 
-    const result = await parseFile(fileStream as ReadStream);
+    const result = await parseInputFile(fileStream as ReadStream);
     expect(result).toEqual(testResult1);
   });
   it('should return correct result for a second input', async () => {
     const fileStream = Readable.from(testInput2);
 
-    const result = await parseFile(fileStream as ReadStream);
+    const result = await parseInputFile(fileStream as ReadStream);
     expect(result).toEqual(testResult2);
   });
 });

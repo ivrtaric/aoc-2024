@@ -1,20 +1,17 @@
 import { ReadStream } from 'fs';
-import * as readline from 'readline';
 
-import { isSafeReport, parseLine } from 'src/2024/02/utility';
+import { parseFile } from '../common/utilities';
+import { isSafeReport, parseLine } from './utility';
 
 export async function redNosedReports(puzzleInputFile: ReadStream): Promise<number> {
-  const lineReader = readline.createInterface({
-    input: puzzleInputFile,
-    crlfDelay: Infinity
-  });
-
   let safeCounter = 0;
-  for await (const line of lineReader) {
+
+  await parseFile(puzzleInputFile, line => {
     const levels = parseLine(line);
+
     if (isSafeReport(levels)) {
       safeCounter++;
-      continue;
+      return;
     }
 
     for (let i = 0; i < levels.length; i++) {
@@ -25,7 +22,7 @@ export async function redNosedReports(puzzleInputFile: ReadStream): Promise<numb
         break;
       }
     }
-  }
+  });
 
   return safeCounter;
 }

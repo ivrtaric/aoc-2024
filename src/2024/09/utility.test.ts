@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { Readable } from 'stream';
 import { ReadStream } from 'fs';
 
-import { compact, defragment, defragmentWholeFiles, FREE_SPACE, parseFile } from './utility';
+import { compact, defragment, defragmentWholeFiles, FREE_SPACE, parseInputFile } from './utility';
 import { DiskMap } from './types';
 
 const testInput = '2333133121414131402';
@@ -31,7 +31,7 @@ describe('parseFile', () => {
   it('should return correct disk map for a specified input', async () => {
     const fileStream = Readable.from(testInput);
 
-    const response = await parseFile(fileStream as ReadStream);
+    const response = await parseInputFile(fileStream as ReadStream);
     expect(response).toEqual(testDiskMap);
   });
 });
