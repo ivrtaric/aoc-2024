@@ -3,7 +3,7 @@ import { Readable } from 'stream';
 import { ReadStream } from 'fs';
 
 import { findArea, findPerimeter, findRegions, findSides, parseFile } from './utility';
-import { Region } from 'src/2024/12/types';
+import { Region } from './types';
 
 describe('parseFile', () => {
   it('should return correct result for a first input', async () => {

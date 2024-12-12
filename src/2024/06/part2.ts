@@ -1,60 +1,70 @@
 import type { ReadStream } from 'fs';
 import {
   changeDirection,
-  move,
+  markVisitedAndMove,
   observe,
   OBSTRUCTION,
   parseFile,
   PATH,
   positionHasDirection,
   trackDirectionAtPosition,
+  traversePath,
   VISITED
 } from './utility';
-import { Direction, DirectionTracker } from 'src/2024/06/types';
+import { Direction, DirectionTracker } from './types';
+import type { Location } from '../common/types';
 
 export async function guardGallivant(puzzleInputFile: ReadStream): Promise<number> {
   const { mappedArea, startingPosition } = await parseFile(puzzleInputFile);
 
+  const { mappedArea: originalPath } = traversePath(
+    mappedArea.map(line => [...line]),
+    startingPosition
+  );
+  const visitedLocations = originalPath.flatMap((line, i) =>
+    line
+      .map((value, j) => (value === VISITED ? ([i, j] as Location) : undefined))
+      .filter(x => x !== undefined)
+  );
+
   let counter = 0;
-  for (let i = 0; i < mappedArea.length; i++) {
-    const tiles = mappedArea[i];
-    for (let j = 0; j < tiles.length; j++) {
-      if (tiles[j] !== PATH) continue;
+  for (const [i, j] of visitedLocations) {
+    if (mappedArea[i][j] !== PATH) continue;
+    if (i === startingPosition[0] && j === startingPosition[1]) continue;
 
-      const modifiedMappedArea = mappedArea.map(line => [...line]);
-      modifiedMappedArea[i][j] = OBSTRUCTION;
+    const modifiedMappedArea = mappedArea.map(line => [...line]);
+    modifiedMappedArea[i][j] = OBSTRUCTION;
 
-      let currentPosition = startingPosition;
-      let direction: Direction = [-1, 0];
-      const directions: DirectionTracker = [];
-      trackDirectionAtPosition(currentPosition, direction, directions);
-      let isComplete = false;
-      for (;;) {
-        const currentTile = observe(currentPosition, [0, 0], modifiedMappedArea);
-        if (currentTile === VISITED) {
-          if (positionHasDirection(currentPosition, direction, directions)) {
-            counter++;
-            break;
-          }
+    let currentPosition = startingPosition;
+    let direction: Direction = [-1, 0];
+    const directions: DirectionTracker = [];
+    trackDirectionAtPosition(currentPosition, direction, directions);
+    let isComplete = false;
+    for (;;) {
+      const currentTile = observe(currentPosition, [0, 0], modifiedMappedArea);
+      if (currentTile === VISITED) {
+        if (positionHasDirection(currentPosition, direction, directions)) {
+          counter++;
+          break;
         }
-        trackDirectionAtPosition(currentPosition, direction, directions);
-
-        const nextTile = observe(currentPosition, direction, modifiedMappedArea);
-        switch (nextTile) {
-          case null:
-            isComplete = true;
-            break;
-          case OBSTRUCTION:
-            direction = changeDirection(direction);
-            break;
-          case VISITED:
-          // Fall-through
-          case PATH:
-            currentPosition = move(currentPosition, direction, modifiedMappedArea);
-        }
-
-        if (isComplete) break;
       }
+      trackDirectionAtPosition(currentPosition, direction, directions);
+
+      const nextTile = observe(currentPosition, direction, modifiedMappedArea);
+      switch (nextTile) {
+        case null:
+          isComplete = true;
+          break;
+        case OBSTRUCTION:
+          direction = changeDirection(direction);
+          break;
+        case VISITED:
+        // Fall-through
+        case PATH:
+          currentPosition = markVisitedAndMove(currentPosition, direction, modifiedMappedArea);
+      }
+
+      if (isComplete) break;
     }
   }
 

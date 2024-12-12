@@ -3,7 +3,8 @@ import { Readable } from 'stream';
 import { ReadStream } from 'fs';
 
 import { findRating, findScore, parseFile } from './utility';
-import { Location, TopographicMap } from './types';
+import { TopographicMap } from './types';
+import type { Location } from '../common/types';
 
 const testInput = [
   '89010123',

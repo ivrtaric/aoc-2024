@@ -1,7 +1,9 @@
 import type { ReadStream } from 'fs';
 import * as readline from 'readline';
 
-import { Location, PuzzleInput, TopographicMap } from './types';
+import { Location } from '../common/types';
+import { PuzzleInput, TopographicMap } from './types';
+import { keyOf } from 'src/2024/common/utilities';
 
 export const parseFile = async (puzzleInputFile: ReadStream): Promise<PuzzleInput> => {
   const lineReader = readline.createInterface({
@@ -27,7 +29,7 @@ export const parseFile = async (puzzleInputFile: ReadStream): Promise<PuzzleInpu
 const emptySet = new Set<string>();
 export const findScore = (position: Location, map: TopographicMap) =>
   search<Set<string>>(position, null, map, {
-    validValue: (l: Location) => new Set<string>([`${l[0]},${l[1]}`]),
+    validValue: (l: Location) => new Set<string>([keyOf(l)]),
     invalidValue: (l: Location) => emptySet,
     findSubPath: (
       [x, y]: Location,

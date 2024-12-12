@@ -1,6 +1,10 @@
 import type { ReadStream } from 'fs';
 import * as readline from 'readline';
-import { Location, LocationMap, MappedArea, Tiles } from './types';
+
+import { LocationMap, MappedArea, Tiles } from './types';
+import type { Location } from '../common/types';
+
+import { keyOf } from '../common/utilities';
 
 export const parseFile = async (puzzleInputFile: ReadStream): Promise<MappedArea> => {
   const lineReader = readline.createInterface({
@@ -12,14 +16,13 @@ export const parseFile = async (puzzleInputFile: ReadStream): Promise<MappedArea
   let height: number = 0;
   let width: number = 0;
   for await (const line of lineReader) {
-    line
-      .split('')
-      .filter(tile => tile !== Tiles.EMPTY && tile !== Tiles.ANTINODE)
-      .forEach((tile, y) => {
-        const frequencyAntennas = antennas.get(tile) ?? [];
-        frequencyAntennas.push([height, y]);
-        antennas.set(tile, frequencyAntennas);
-      });
+    line.split('').forEach((tile, y) => {
+      if (tile === Tiles.EMPTY || tile === Tiles.ANTINODE) return;
+
+      const frequencyAntennas = antennas.get(tile) ?? [];
+      frequencyAntennas.push([height, y]);
+      antennas.set(tile, frequencyAntennas);
+    });
     height++;
     width = line.length;
   }
@@ -47,7 +50,7 @@ export const findAllAntiNodes = (
           mappedArea,
           includeAntennas,
           includeHarmonics
-        ).forEach(an => antiNodeList.add(`${an[0]},${an[1]}`));
+        ).forEach(an => antiNodeList.add(keyOf(an)));
       }
     }
   }
@@ -72,7 +75,7 @@ export const findAllAntiNodesFunctional = (
             )
         )
       )
-      .map(an => `${an[0]},${an[1]}`)
+      .map(keyOf)
   );
 
 const findAntiNodes = (

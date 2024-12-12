@@ -1,15 +1,18 @@
 import type { ReadStream } from 'fs';
 import * as readline from 'readline';
 
-import { Garden, Location, Region } from './types';
+import type { Region } from './types';
+import type { Location, MappedArea } from '../common/types';
 
-export const parseFile = async (puzzleInputFile: ReadStream): Promise<Array<Array<string>>> => {
+import { keyOf, xor } from '../common/utilities';
+
+export const parseFile = async (puzzleInputFile: ReadStream): Promise<MappedArea> => {
   const lineReader = readline.createInterface({
     input: puzzleInputFile,
     crlfDelay: Infinity
   });
 
-  const map: Array<Array<string>> = [];
+  const map: MappedArea = [];
   for await (const line of lineReader) {
     map.push(line.split(''));
   }
@@ -17,14 +20,14 @@ export const parseFile = async (puzzleInputFile: ReadStream): Promise<Array<Arra
   return map;
 };
 
-export const findRegions = (map: Garden): Array<Region> => {
+export const findRegions = (map: MappedArea): Array<Region> => {
   const visited: Array<Array<boolean>> = map.map(row => row.map(_ => false));
   const regions: Array<Region> = [];
 
   for (let x = 0; x < map.length; x++) {
     for (let y = 0; y < map[x].length; y++) {
       if (!visited[x][y]) {
-        const region: Region = { type: map[x][y], plots: emptySet };
+        const region = createRegion(map[x][y]);
         region.plots = visit([x, y], region, map, visited);
         regions.push(region);
       }
@@ -41,7 +44,7 @@ export const findPerimeter = (region: Region): number => {
   for (let x = region.minX ?? 0; x <= (region.maxX ?? -1); x++) {
     let inRegion = false;
     for (let y = region.minY ?? 0; y <= (region.maxY ?? -1); y++) {
-      if (xor(inRegion, region.plots.has(`${x},${y}`))) {
+      if (xor(inRegion, region.plots.has(keyOf([x, y])))) {
         perimeter++;
         inRegion = !inRegion;
       }
@@ -51,7 +54,7 @@ export const findPerimeter = (region: Region): number => {
   for (let y = region.minY ?? 0; y <= (region.maxY ?? -1); y++) {
     let inRegion = false;
     for (let x = region.minX ?? 0; x <= (region.maxX ?? -1); x++) {
-      if (xor(inRegion, region.plots.has(`${x},${y}`))) {
+      if (xor(inRegion, region.plots.has(keyOf([x, y])))) {
         perimeter++;
         inRegion = !inRegion;
       }
@@ -67,11 +70,11 @@ export const findSides = (region: Region): number => {
     .map(plot => plot.split(',').map(Number) as Location)
     .reduce(
       (sum: number, plot: Location) =>
-        sum + countConvexAngles(plot, region.plots) + countConcaveAngles(plot, region.plots),
+        sum + countConvexCorners(plot, region.plots) + countConcaveCorners(plot, region.plots),
       0
     );
 
-  function countConvexAngles([x, y]: Location, plots: Region['plots']): number {
+  function countConvexCorners([x, y]: Location, plots: Region['plots']): number {
     const { U, D, L, R } = getSurroundingKeys([x, y]);
     return [
       !plots.has(U) && !plots.has(R),
@@ -80,7 +83,7 @@ export const findSides = (region: Region): number => {
       !plots.has(D) && !plots.has(L)
     ].reduce((sum, check) => sum + (check ? 1 : 0), 0);
   }
-  function countConcaveAngles([x, y]: Location, plots: Region['plots']): number {
+  function countConcaveCorners([x, y]: Location, plots: Region['plots']): number {
     const { U, D, L, R, UL, UR, DL, DR } = getSurroundingKeys([x, y]);
     return [
       plots.has(U) && plots.has(R) && !plots.has(UR),
@@ -103,11 +106,20 @@ export const findSides = (region: Region): number => {
   }
 };
 
+const createRegion = (type: Region['type']): Region => ({
+  type,
+  plots: new Set<string>(),
+  minX: Infinity,
+  maxX: -1,
+  minY: Infinity,
+  maxY: -1
+});
+
 const emptySet = new Set<string>();
 const visit = (
   [x, y]: Location,
   region: Region,
-  map: Garden,
+  map: MappedArea,
   visited: Array<Array<boolean>>
 ): Region['plots'] => {
   if (!isInMappedArea([x, y], map)) return emptySet;
@@ -115,10 +127,10 @@ const visit = (
   if (visited[x][y]) return emptySet;
 
   visited[x][y] = true;
-  region.minX = x < (region.minX ?? Infinity) ? x : region.minX;
-  region.maxX = x > (region.maxX ?? -1) ? x : region.maxX;
-  region.minY = y < (region.minY ?? Infinity) ? y : region.minY;
-  region.maxY = y > (region.maxY ?? -1) ? y : region.maxY;
+  region.minX = x < region.minX ? x : region.minX;
+  region.maxX = x > region.maxX ? x : region.maxX;
+  region.minY = y < region.minY ? y : region.minY;
+  region.maxY = y > region.maxY ? y : region.maxY;
 
   return new Set<string>([
     keyOf([x, y]),
@@ -129,9 +141,5 @@ const visit = (
   ]);
 };
 
-const keyOf = ([x, y]: Location): string => `${x},${y}`;
-
-const isInMappedArea = ([x, y]: Location, map: Garden): boolean =>
+const isInMappedArea = ([x, y]: Location, map: MappedArea): boolean =>
   x >= 0 && x < map.length && y >= 0 && y < (map[0]?.length ?? 0);
-
-const xor = (a: boolean, b: boolean): boolean => (a && !b) || (!a && b);
