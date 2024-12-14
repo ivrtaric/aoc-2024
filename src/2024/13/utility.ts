@@ -1,35 +1,23 @@
 import type { ReadStream } from 'fs';
 
 import { parseFile } from '../common/utilities';
+import {
+  A_TOKEN_FACTOR,
+  B_TOKEN_FACTOR,
+  PRIZE_POSITION_MODIFIER,
+  PuzzleData,
+  State,
+  System
+} from './types';
 
 const BUTTON_A_REGEX = /^Button A: X\+(?<A>\d+), Y\+(?<D>\d+)$/;
 const BUTTON_B_REGEX = /^Button B: X\+(?<B>\d+), Y\+(?<E>\d+)$/;
 const PRIZE_REGEX = /^Prize: X=(?<C>\d+), Y=(?<F>\d+)$/;
 
-const enum State {
-  BUTTON_A = 'A',
-  BUTTON_B = 'B',
-  PRIZE = 'P',
-  COMPLETE = 'C'
-}
-
-type System = {
-  A: number;
-  B: number;
-  C: number;
-  D: number;
-  E: number;
-  F: number;
-};
-
-export const A_TOKEN_FACTOR = 3;
-export const B_TOKEN_FACTOR = 1;
-export const PRIZE_POSITION_MODIFIER = 10000000000000;
-
 export const parseInputFile = async (
   puzzleInputFile: ReadStream,
   modifyPrizePosition = false
-): Promise<{ systems: Array<System> }> => {
+): Promise<PuzzleData> => {
   let state = State.BUTTON_A;
   const systems: Array<System> = [];
   let currentSystem = createSystem();
