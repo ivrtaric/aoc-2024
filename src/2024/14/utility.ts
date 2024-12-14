@@ -1,9 +1,9 @@
 import type { ReadStream } from 'fs';
 
-import { parseFile } from '../common/utilities';
+import { keyOf, parseFile } from '../common/utilities';
 import type { Location, NumberPair, Space } from '../common/types';
 
-import type { CountsPerQuadrant, Robot } from './types';
+import { CountsPerQuadrant, Robot, WATCHED_REGION_SIZE } from './types';
 
 const ROBOT_REGEX = /^p=(?<x>\d+),(?<y>\d+)\s+v=(?<dx>-?\d+),(?<dy>-?\d+)$/;
 export const parseInputFile = async (puzzleInputFile: ReadStream): Promise<Array<Robot>> =>
@@ -58,4 +58,40 @@ export const splitInQuadrants = (positions: Array<Location>, space: Space): Coun
     },
     { Q1: 0, Q2: 0, Q3: 0, Q4: 0 }
   );
+};
+
+export const findRegions = (positions: Set<string>): Array<Set<string>> => {
+  const regions: Array<Set<string>> = [];
+  for (const position of positions) {
+    const region = visit(position, positions);
+    if (region.size > WATCHED_REGION_SIZE) regions.push(region);
+  }
+
+  return regions;
+};
+
+export const printRegions = (regions: Array<Set<string>>, space: Space): void => {
+  for (let y = 0; y < space.height; y++) {
+    const line = [];
+    for (let x = 0; x < space.width; x++) {
+      const position = keyOf([x, y]);
+      line.push(regions.reduce((has, r) => has || r.has(position), false) ? '*' : ' ');
+    }
+    console.log(line.join(''));
+  }
+};
+
+const emptySet = new Set<string>();
+const visit = (position: string, positions: Set<string>): Set<string> => {
+  if (!positions.has(position)) return emptySet;
+
+  positions.delete(position);
+  const [x, y] = position.split(',').map(Number);
+  return new Set<string>([
+    position,
+    ...visit(keyOf([x - 1, y]), positions),
+    ...visit(keyOf([x + 1, y]), positions),
+    ...visit(keyOf([x, y - 1]), positions),
+    ...visit(keyOf([x, y + 1]), positions)
+  ]);
 };

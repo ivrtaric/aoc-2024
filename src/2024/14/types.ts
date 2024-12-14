@@ -12,5 +12,6 @@ export type CountsPerQuadrant = {
   Q4: number;
 };
 
-export const WATCHED_REGION_SIZE = 100;
-export const SECONDS_CHECK_LIMIT = 200000;
+export const WATCHED_REGION_SIZE = 20;
+// export const WATCHED_REGION_SIZE = 100;
+export const SECONDS_CHECK_LIMIT = 50000;
