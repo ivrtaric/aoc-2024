@@ -1,7 +1,7 @@
 import type { ReadStream } from 'fs';
 
-import type { Location } from '../common/types';
-import { Direction, DirectionTracker } from './types';
+import type { Direction, Location } from '../common/types';
+import { DirectionTracker } from './types';
 import {
   changeDirection,
   markVisitedAndMove,

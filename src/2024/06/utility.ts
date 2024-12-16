@@ -1,7 +1,7 @@
 import type { ReadStream } from 'fs';
 
-import type { Direction, DirectionTracker } from './types';
-import type { Location, MappedArea } from '../common/types';
+import type { DirectionTracker } from './types';
+import type { Direction, Location, MappedArea } from '../common/types';
 
 import { keyOf, parseFile } from '../common/utilities';
 
