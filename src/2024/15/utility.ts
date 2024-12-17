@@ -239,21 +239,6 @@ export const blankLookAhead = (
 
   return map[ox][oy] === Token.BLANK ? [ox, oy] : null;
 };
-export const moveBoxes = (
-  [x, y]: Location,
-  [dx, dy]: Direction,
-  map: MappedArea<Token>
-): Location | null => {
-  if (dy !== 0) {
-  } else if (dx !== 0) {
-  }
-  let [ox, oy] = [x + dx, y + dy];
-  while (map[ox][oy] === Token.BOX) {
-    [ox, oy] = [ox + dx, oy + dy];
-  }
-
-  return map[ox][oy] === Token.BLANK ? [ox, oy] : null;
-};
 
 export const gpsCoordinate = ([x, y]: Location): number => 100 * x + y;
 export const getBoxGpsCoordinates = (map: MappedArea<Token>): Array<number> =>
