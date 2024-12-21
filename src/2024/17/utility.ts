@@ -5,7 +5,7 @@ import { Computer, PuzzleData } from './types';
 const REGEX_REGISTER = /Register (?<register>[ABC]): (?<value>\d+)/;
 const REGEX_PROGRAM = /Program: (?<value>(\d(,|$))+)/;
 export const parseInputFile = async (puzzleInputFile: ReadStream): Promise<PuzzleData> => {
-  const data: PuzzleData = { A: 0, B: 0, C: 0, program: [] };
+  const data: PuzzleData = { A: 0n, B: 0n, C: 0n, program: [] };
 
   let state = 'registers';
   await parseFile(puzzleInputFile, line => {
@@ -21,7 +21,7 @@ export const parseInputFile = async (puzzleInputFile: ReadStream): Promise<Puzzl
         case 'A':
         case 'B':
         case 'C':
-          data[register] = Number(value);
+          data[register] = BigInt(value);
           break;
         default:
           throw new Error('Unrecognized input state');
@@ -35,18 +35,18 @@ export const parseInputFile = async (puzzleInputFile: ReadStream): Promise<Puzzl
   return data;
 };
 
-const combo = (op: number, c: Computer) => {
+const combo = (op: bigint, c: Computer) => {
   switch (op) {
-    case 0:
-    case 1:
-    case 2:
-    case 3:
+    case 0n:
+    case 1n:
+    case 2n:
+    case 3n:
       return op;
-    case 4:
+    case 4n:
       return c.A;
-    case 5:
+    case 5n:
       return c.B;
-    case 6:
+    case 6n:
       return c.C;
     default:
       throw new Error('Unrecognized combo op');
@@ -62,17 +62,17 @@ const combo = (op: number, c: Computer) => {
 // adv(3) --- c.A / 8 => c.A
 // out(5) --- c.B % 8 => []
 // jnz(0) --- Jump if c.A <> 0
-const adv = (op: number, c: Computer) => (c.A = Math.floor(c.A / Math.pow(2, combo(op, c))));
-const bxl = (op: number, c: Computer) => (c.B = c.B ^ op);
-const bst = (op: number, c: Computer) => (c.B = combo(op, c) % 8);
-const jnz = (op: number, c: Computer) =>
-  (c.instructionPointer = c.A === 0 ? c.instructionPointer : op - 2);
-const bxc = (op: number, c: Computer) => (c.B = c.B ^ c.C);
-const out = (op: number, c: Computer) => c.output.push(...String(combo(op, c) % 8).split(''));
-const bdv = (op: number, c: Computer) => (c.B = Math.floor(c.A / Math.pow(2, combo(op, c))));
-const cdv = (op: number, c: Computer) => (c.C = Math.floor(c.A / Math.pow(2, combo(op, c))));
+const adv = (op: bigint, c: Computer) => (c.A = c.A / 2n ** combo(op, c));
+const bxl = (op: bigint, c: Computer) => (c.B = c.B ^ op);
+const bst = (op: bigint, c: Computer) => (c.B = combo(op, c) % 8n);
+const jnz = (op: bigint, c: Computer) =>
+  (c.instructionPointer = c.A === 0n ? c.instructionPointer : Number(op - 2n));
+const bxc = (op: bigint, c: Computer) => (c.B = c.B ^ c.C);
+const out = (op: bigint, c: Computer) => c.output.push(...String(combo(op, c) % 8n).split(''));
+const bdv = (op: bigint, c: Computer) => (c.B = c.A / 2n ** combo(op, c));
+const cdv = (op: bigint, c: Computer) => (c.C = c.A / 2n ** combo(op, c));
 
-export const INSTRUCTIONS: Record<number, (op: number, c: Computer) => void> = {
+export const INSTRUCTIONS: Record<number, (op: bigint, c: Computer) => void> = {
   0: adv,
   1: bxl,
   2: bst,
@@ -89,7 +89,7 @@ export const run = (c: Computer): string => {
     if (c.instructionPointer >= c.program.length) {
       break;
     }
-    INSTRUCTIONS[c.program[c.instructionPointer]](c.program[c.instructionPointer + 1], c);
+    INSTRUCTIONS[c.program[c.instructionPointer]](BigInt(c.program[c.instructionPointer + 1]), c);
     c.instructionPointer += 2;
   }
 

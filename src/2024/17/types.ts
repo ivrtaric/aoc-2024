@@ -1,7 +1,7 @@
 export type PuzzleData = {
-  A: number;
-  B: number;
-  C: number;
+  A: bigint;
+  B: bigint;
+  C: bigint;
   program: Array<number>;
 };
 
