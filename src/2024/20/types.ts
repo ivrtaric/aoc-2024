@@ -12,3 +12,5 @@ export type PuzzleData = {
   start: Location;
   end: Location;
 };
+
+export const CHEAT_DURATION = 20;

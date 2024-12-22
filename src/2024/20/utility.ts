@@ -2,7 +2,7 @@ import { ReadStream } from 'fs';
 
 import { keyOf, parseFile } from '../common/utilities';
 import { Location, MappedArea } from '../common/types';
-import { PuzzleData, Tiles } from './types';
+import { CHEAT_DURATION, PuzzleData, Tiles } from './types';
 
 export const parseInputFile = async (puzzleInputFile: ReadStream): Promise<PuzzleData> => {
   let start: Location = [0, 0];
@@ -60,25 +60,48 @@ export const findShortestPath = (
 };
 
 export const calculateTimeSavedByCheat = (
-  [x, y]: Location,
+  [x1, y1]: Location,
+  [x2, y2]: Location,
   distances: Map<string, number>,
   map: MappedArea<string | number>
 ): number => {
-  if (map[x][y] !== Tiles.WALL) return 0;
-
-  if (map[x - 1][y] !== Tiles.WALL && map[x + 1][y] !== Tiles.WALL) {
-    const [left, right] = [distances.get(keyOf([x - 1, y]))!, distances.get(keyOf([x + 1, y]))!];
-    const [min, max] = left < right ? [left, right] : [right, left];
-    return max - (min + 2);
+  if (map[x1][y1] === Tiles.WALL || map[x2][y2] === Tiles.WALL) {
+    return 0;
   }
 
-  if (map[x][y - 1] !== Tiles.WALL && map[x][y + 1] !== Tiles.WALL) {
-    const [left, right] = [distances.get(keyOf([x, y - 1]))!, distances.get(keyOf([x, y + 1]))!];
-    const [min, max] = left < right ? [left, right] : [right, left];
-    return max - (min + 2);
+  const [left, right] = [distances.get(keyOf([x1, y1]))!, distances.get(keyOf([x2, y2]))!];
+  const [min, max] = left < right ? [left, right] : [right, left];
+  return max - (min + calculateCheatDuration([x1, y1], [x2, y2]));
+};
+
+export const canUseCheat = (
+  [sx, sy]: Location,
+  [ex, ey]: Location,
+  map: MappedArea<string | number>
+) =>
+  map[sx][sy] !== Tiles.WALL &&
+  map[ex][ey] !== Tiles.WALL &&
+  hasWallsBetween([sx, sy], [ex, ey], map) &&
+  calculateCheatDuration([sx, sy], [ex, ey]) <= CHEAT_DURATION;
+
+const calculateCheatDuration = ([sx, sy]: Location, [ex, ey]: Location) =>
+  Math.abs(ex - sx) + Math.abs(ey - sy);
+
+const hasWallsBetween = (
+  [sx, sy]: Location,
+  [ex, ey]: Location,
+  map: MappedArea<string | number>
+) => {
+  const [minX, maxX] = sx < ex ? [sx, ex] : [ex, sx];
+  const [minY, maxY] = sy < ey ? [sy, ey] : [ey, sy];
+
+  for (let i = minX; i <= maxX; i++) {
+    for (let j = minY; j <= maxY; j++) {
+      if (map[i][j] === Tiles.WALL) return true;
+    }
   }
 
-  return 0;
+  return false;
 };
 
 const findNeighbours = (key: string, map: MappedArea<string | number>) => {
