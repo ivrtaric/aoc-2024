@@ -49,15 +49,14 @@ export const matchDesign = (
   if (design === '') return 1;
   if (cache.has(design)) return cache.get(design)!;
 
-  let combinationCount = 0;
-  for (const pattern of patterns.get(design.charAt(0)) ?? []) {
-    if (!design.startsWith(pattern)) continue;
-
-    const subMatch = matchDesign(design.substring(pattern.length), patterns, cache);
-    if (subMatch !== null && subMatch > 0) {
-      combinationCount += subMatch;
-    }
-  }
+  const combinationCount = (patterns.get(design.charAt(0)) ?? []).reduce(
+    (cc, pattern) =>
+      cc +
+      (design.startsWith(pattern)
+        ? matchDesign(design.substring(pattern.length), patterns, cache)
+        : 0),
+    0
+  );
 
   cache.set(design, combinationCount);
   return combinationCount;
