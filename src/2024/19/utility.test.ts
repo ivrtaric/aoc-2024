@@ -23,7 +23,12 @@ describe('parseInputFile', () => {
 
     const result = await parseInputFile(fileStream);
     expect(result).toEqual({
-      patterns: ['r', 'wr', 'b', 'g', 'bwu', 'rb', 'gb', 'br'],
+      patterns: new Map<string, Array<string>>([
+        ['b', ['bwu', 'br', 'b']],
+        ['g', ['gb', 'g']],
+        ['r', ['rb', 'r']],
+        ['w', ['wr']]
+      ]),
       designs: ['brwrr', 'bggr', 'gbbr', 'rrbgbr', 'ubwu', 'bwurrg', 'brgr', 'bbrgwb']
     });
   });
